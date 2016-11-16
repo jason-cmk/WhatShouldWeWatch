@@ -7,6 +7,8 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
+using WhatShouldWeWatch.Models;
+using System.Collections.Generic;
 
 namespace WhatShouldWeWatch
 {
@@ -22,12 +24,190 @@ namespace WhatShouldWeWatch
             if (activity.Type == ActivityTypes.Message)
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
-                // calculate something for us to return
-                int length = (activity.Text ?? string.Empty).Length;
 
+                // Stateful variables
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+                userData.SetProperty<List<int>>("seen", new List<int>());
+                string message = activity.Text;
+
+                string endOutput = "Hi there, don't know what we should watch? Give me something to work off (a movie or a genre for example)";
+                
+                if (!userData.GetProperty<bool>("NewConversation"))
+                {
+                    int queryCount = userData.GetProperty<int>("QueryCount");
+
+                    if (message.ToLower().Contains("clear") || message.ToLower().Contains("reset"))
+                    {
+                        endOutput = "Ending conversation. Give me a movie or a genre to start again.";
+                        await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
+                    }
+                    else // if querying
+                    {
+                        string baseUri = "https://api.themoviedb.org/3";
+                        string credentials = "?api_key=e01be34ceffec7c3b4fc1c591884c2fc";
+                        ResultModel.RootObject rootObject;
+                        HttpClient client = new HttpClient();
+                        ResultModel.Result first;
+                        ResultModel.Result second;
+                        List<int> seen = new List<int>();
+
+                        if (queryCount == 0)
+                        {
+                            string x = await client.GetStringAsync(new Uri(
+                                baseUri
+                                + "/search/movie"
+                                + credentials
+                                + "&query="
+                                + message
+                                ));
+                            rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
+
+                            if (rootObject.total_results > 1)
+                            {
+                                rootObject.results = rootObject.results.OrderByDescending(o => o.popularity).ToList();
+                                first = rootObject.results[0];
+                                second = rootObject.results[1];
+                                userData.SetProperty<ResultModel.Result>("First", first);
+                                userData.SetProperty<ResultModel.Result>("Second", second);
+                                endOutput = $"Would you rather watch {first.title} or {second.title}?";
+
+                                seen = userData.GetProperty<List<int>>("seen");
+                                seen.Add(first.id);
+                                seen.Add(second.id);
+                                userData.SetProperty<List<int>>("seen", seen);
+
+                                userData.SetProperty<int>("QueryCount", queryCount + 1);
+                                // save user data to bot state
+                                await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                            }
+                            else
+                            {
+                                endOutput = $"I would recommend {rootObject.results[0].title}";
+                                await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
+                            }
+                            userData.SetProperty<int>("QueryCount", queryCount + 1);
+
+                        }
+                        else if (queryCount < 3)
+                        {
+                            first = userData.GetProperty<ResultModel.Result>("First");
+                            second = userData.GetProperty<ResultModel.Result>("Second");
+                            int searchId = 0;
+                            if (message.ToLower().Equals(first.title.ToLower()))
+                            {
+                                searchId = first.id;
+                            }
+                            else if (message.ToLower().Equals(second.title.ToLower()))
+                            {
+                                searchId = second.id;
+                            }
+                            else
+                            {
+                                string search = await client.GetStringAsync(new Uri(
+                                baseUri
+                                + "/search/movie"
+                                + credentials
+                                + "&query="
+                                + message
+                                ));
+                                rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(search);
+                                searchId = rootObject.results.OrderByDescending(o => o.popularity).ToList()[0].id;
+                            }
+
+                            string x = await client.GetStringAsync(new Uri(
+                                baseUri
+                                + $"/movie/{searchId}/similar"
+                                + credentials
+                                ));
+                            rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
+                            rootObject.results = rootObject.results.OrderByDescending(o => o.popularity).ToList();
+
+                            if (rootObject.results.Count > 1)
+                            {
+                                first = rootObject.results[0];
+                                second = rootObject.results[1];
+
+                                userData.SetProperty<ResultModel.Result>("First", first);
+                                userData.SetProperty<ResultModel.Result>("Second", second);
+                                endOutput = $"Would you rather watch {first.title} or {second.title}?";
+                                userData.SetProperty<int>("QueryCount", queryCount + 1);
+
+                                seen = userData.GetProperty<List<int>>("seen");
+                                seen.Add(first.id);
+                                seen.Add(second.id);
+                                userData.SetProperty<List<int>>("seen", seen);
+                            }
+                            else
+                            {
+                                endOutput = $"I would recommend {rootObject.results[0].title}";
+                                await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
+                            }
+
+                            // save user data to bot state
+                            await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                        }
+                        else
+                        {
+                            first = userData.GetProperty<ResultModel.Result>("First");
+                            second = userData.GetProperty<ResultModel.Result>("Second");
+                            int searchId;
+                            if (message.ToLower().Equals(first.title.ToLower()))
+                            {
+                                searchId = first.id;
+                            }
+                            else if (message.ToLower().Equals(second.title.ToLower()))
+                            {
+                                searchId = second.id;
+                            }
+                            else
+                            {
+                                string search = await client.GetStringAsync(new Uri(
+                                baseUri
+                                + "/search/movie"
+                                + credentials
+                                + "&query="
+                                + message
+                                ));
+                                rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(search);
+                                searchId = rootObject.results.OrderByDescending(o => o.popularity).ToList()[0].id;
+                            }
+                            string x = await client.GetStringAsync(new Uri(
+                                baseUri
+                                + $"/movie/{searchId}/recommendations"
+                                + credentials
+                                ));
+                            rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
+
+                            bool found = false;
+                            int i = 0;
+                            seen = userData.GetProperty<List<int>>("seen");
+                            rootObject.results = rootObject.results.OrderByDescending(o => o.popularity).ToList();
+                            //while (!found || i < rootObject.results.Count)
+                            //{
+                            //    if (seen.IndexOf(rootObject.results[i].id) == -1)
+                            //    {
+                            //        found = true;
+                            //    }
+                            //    i++;
+                            //}
+                            endOutput = $"I would recommend {rootObject.results[i].title}";
+                            await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
+                        }
+
+                        
+                    }
+                }
+                else
+                {
+                    userData.SetProperty<bool>("NewConversation", false);
+                }
+                
                 // return our reply to the user
-                Activity reply = activity.CreateReply($"You sent {activity.Text} which was {length} characters");
+                Activity reply = activity.CreateReply(endOutput);
                 await connector.Conversations.ReplyToActivityAsync(reply);
+
+                
             }
             else
             {

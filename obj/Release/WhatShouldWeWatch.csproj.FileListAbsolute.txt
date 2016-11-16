@@ -1,0 +1,38 @@
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Bot Application1.dll.config
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Bot Application1.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Bot Application1.pdb
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Autofac.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Chronic.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Bot.Builder.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Bot.Connector.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.IdentityModel.Protocol.Extensions.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Rest.ClientRuntime.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.WindowsAzure.Configuration.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Newtonsoft.Json.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.Net.Http.Formatting.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.Web.Http.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.Web.Http.WebHost.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Autofac.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Bot.Builder.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Bot.Connector.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.IdentityModel.Protocol.Extensions.pdb
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.IdentityModel.Protocol.Extensions.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Rest.ClientRuntime.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.WindowsAzure.Configuration.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Newtonsoft.Json.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.IdentityModel.Tokens.Jwt.pdb
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.IdentityModel.Tokens.Jwt.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.Net.Http.Formatting.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.Web.Http.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\System.Web.Http.WebHost.xml
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ar\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\en\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\es\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\fa\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\fr\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ja\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ru\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\zh-hans\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Release\Bot Application1.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Release\Bot Application1.pdb
