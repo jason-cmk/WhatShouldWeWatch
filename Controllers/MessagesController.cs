@@ -31,15 +31,15 @@ namespace WhatShouldWeWatch
                 userData.SetProperty<List<int>>("seen", new List<int>());
                 string message = activity.Text;
 
-                string endOutput = "Hi there, don't know what we should watch? Give me something to work off (a movie or a genre for example)";
-                
-                if (!userData.GetProperty<bool>("NewConversation"))
+                string endOutput = "Hi there, don't know what we should watch? Give me something to work off (a movie)";
+                bool greeted = userData.GetProperty<bool>("Greeted");
+                if (greeted)
                 {
                     int queryCount = userData.GetProperty<int>("QueryCount");
 
                     if (message.ToLower().Contains("clear") || message.ToLower().Contains("reset"))
                     {
-                        endOutput = "Ending conversation. Give me a movie or a genre to start again.";
+                        endOutput = "Ending conversation. Give me a movie to start again.";
                         await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     }
                     else // if querying
@@ -179,7 +179,7 @@ namespace WhatShouldWeWatch
                                 ));
                             rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
 
-                            bool found = false;
+                            //bool found = false;
                             int i = 0;
                             seen = userData.GetProperty<List<int>>("seen");
                             rootObject.results = rootObject.results.OrderByDescending(o => o.popularity).ToList();
@@ -200,7 +200,9 @@ namespace WhatShouldWeWatch
                 }
                 else
                 {
-                    userData.SetProperty<bool>("NewConversation", false);
+                    userData.SetProperty<bool>("Greeted", true);
+                    // save user data to bot state
+                    await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
                 }
                 
                 // return our reply to the user
