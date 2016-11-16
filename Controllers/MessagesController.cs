@@ -31,7 +31,7 @@ namespace WhatShouldWeWatch
                 userData.SetProperty<List<int>>("seen", new List<int>());
                 string message = activity.Text;
 
-                string endOutput = "Hi there, don't know what we should watch? Give me something to work off (a movie)";
+                string endOutput = "Hi there, don't know what we should watch? Give me something to work off (a film)";
                 bool greeted = userData.GetProperty<bool>("Greeted");
                 if (greeted)
                 {
@@ -39,7 +39,7 @@ namespace WhatShouldWeWatch
 
                     if (message.ToLower().Contains("clear") || message.ToLower().Contains("reset"))
                     {
-                        endOutput = "Ending conversation. Give me a movie to start again.";
+                        endOutput = "Okay okay let's stop. Give me another film to start again.";
                         await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     }
                     else // if querying
@@ -83,7 +83,7 @@ namespace WhatShouldWeWatch
                             }
                             else
                             {
-                                endOutput = $"I would recommend {rootObject.results[0].title}";
+                                endOutput = $"I would recommend the film {rootObject.results[0].title}. Message me to start again";
                                 await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                             }
                             userData.SetProperty<int>("QueryCount", queryCount + 1);
@@ -140,7 +140,7 @@ namespace WhatShouldWeWatch
                             }
                             else
                             {
-                                endOutput = $"I would recommend {rootObject.results[0].title}";
+                                endOutput = $"I would recommend the film {rootObject.results[0].title}. Message me to start again";
                                 await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                             }
 
@@ -191,7 +191,7 @@ namespace WhatShouldWeWatch
                             //    }
                             //    i++;
                             //}
-                            endOutput = $"I would recommend {rootObject.results[i].title}";
+                            endOutput = $"I would recommend the film {rootObject.results[i].title}. Message me to start again";
                             await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                         }
 
