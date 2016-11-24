@@ -37,3 +37,4 @@ C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\zh
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Release\Bot Application1.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Release\Bot Application1.pdb
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Release\WhatShouldWeWatch.csprojResolveAssemblyReference.cache
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Cognitive.LUIS.dll
