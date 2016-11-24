@@ -35,5 +35,6 @@ C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\fr
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ja\Microsoft.Bot.Builder.resources.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ru\Microsoft.Bot.Builder.resources.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\zh-hans\Microsoft.Bot.Builder.resources.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\WhatShouldWeWatch.csprojResolveAssemblyReference.cache
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\Bot Application1.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\Bot Application1.pdb
