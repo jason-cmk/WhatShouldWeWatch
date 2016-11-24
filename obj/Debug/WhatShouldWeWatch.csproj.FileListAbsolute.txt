@@ -5,6 +5,7 @@ C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Au
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Chronic.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Bot.Builder.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Bot.Connector.dll
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Cognitive.LUIS.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.IdentityModel.Protocol.Extensions.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.Rest.ClientRuntime.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\Microsoft.WindowsAzure.Configuration.dll
@@ -34,6 +35,6 @@ C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\fr
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ja\Microsoft.Bot.Builder.resources.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\ru\Microsoft.Bot.Builder.resources.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\bin\zh-hans\Microsoft.Bot.Builder.resources.dll
-C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\WhatShouldWeWatch.csprojResolveAssemblyReference.cache
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\Bot Application1.dll
 C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\Bot Application1.pdb
+C:\Users\jaska_000\Documents\Projects\WhatShouldWeWatch\WhatShouldWeWatch\obj\Debug\WhatShouldWeWatch.csprojResolveAssemblyReference.cache
