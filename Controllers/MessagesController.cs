@@ -13,6 +13,8 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using WhatShouldWeWatch.Dialogues;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 namespace WhatShouldWeWatch
 {
@@ -29,216 +31,174 @@ namespace WhatShouldWeWatch
         {
             if (activity.Type == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, () => new WhatShouldWeWatchDialogue());
+                ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
 
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+
+                HttpClient client = new HttpClient();
+                ResultModel.Result resultObject;
+                string baseUri = "https://api.themoviedb.org/3";
+                string themoviedbUrl = "https://www.themoviedb.org/movie/";
+                string imageUrl = "https://image.tmdb.org/t/p/w600_and_h900_bestv2";
+                string apiKey = "?api_key=e01be34ceffec7c3b4fc1c591884c2fc";
+
+                Regex addFilmRegex = new Regex("^<ADD FILM>{id: [0-9]+,title: .+}$");
+                Regex removeFilmRegex = new Regex("^<REMOVE FILM>{id: [0-9]+,title: .+}$");
+                Match addFilmMatch = addFilmRegex.Match(activity.Text);
+                Match removeFilmMatch = removeFilmRegex.Match(activity.Text);
+                if (addFilmMatch.Success) // Handle "add to watch list" postback
+                {
+                    string film = activity.Text.Substring(10);
+                    JObject filmJson = JObject.Parse(film);
+                    string filmTitle = (string)filmJson["title"];
+                    int filmId = (int)filmJson["id"];
+                    Activity reply = activity.CreateReply($"Adding \"{filmTitle}\" to your watch list..");
+                    await connector.Conversations.SendToConversationAsync(reply);
+
+                    UserResult userResultModel = new UserResult
+                    {
+                        userId = activity.From.Id,
+                        resultId = filmId
+                    };
+                    
+                    await AzureManager.AzureManagerInstance.AddUserResult(userResultModel);
+                    reply = activity.CreateReply($"It's done! Here is your to-watch list:");
+
+                    List<UserResult> userResultList = await AzureManager.AzureManagerInstance.GetUserResults();
+                    List<UserResult> personalizedList = userResultList.Where(o => o.userId.Equals(activity.From.Id)).ToList();
+
+                    // Display to-watch list
+                    reply.AttachmentLayout = "carousel";
+                    reply.Attachments = new List<Attachment>();
+                    foreach (UserResult userResult in personalizedList)
+                    {
+                        string apiQuery = await client.GetStringAsync(new Uri(
+                            baseUri
+                            + $"/movie/{userResult.resultId}"
+                            + apiKey
+                        ));
+
+                        resultObject = JsonConvert.DeserializeObject<ResultModel.Result>(apiQuery);
+                        List<CardImage> cardImages = new List<CardImage>();
+                        List<CardAction> cardButtons = new List<CardAction>();
+                        CardImage ci = new CardImage($"{imageUrl}{resultObject.poster_path}");
+                        cardImages.Add(ci);
+                        CardAction ca = new CardAction()
+                        {
+                            Title = resultObject.title,
+                            Type = "openUrl",
+                            Value = $"{themoviedbUrl}{resultObject.id}"
+                        };
+                        CardAction button = new CardAction()
+                        {
+                            Title = $"Remove from watch list",
+                            Type = "postBack",
+                            Value = "<REMOVE FILM>{"
+                                    + $"id: {resultObject.id},"
+                                    + $"title: \"{resultObject.title}\""
+                                    + "}"
+                        };
+                        cardButtons.Add(button);
+                        ThumbnailCard tc = new ThumbnailCard()
+                        {
+                            Title = resultObject.title,
+                            Subtitle = resultObject.overview,
+                            Images = cardImages,
+                            Tap = ca,
+                            Buttons = cardButtons
+                        };
+                        reply.Attachments.Add(tc.ToAttachment());
+                    }
+
+                    await connector.Conversations.SendToConversationAsync(reply);
+                } else if (removeFilmMatch.Success) // handle "remove from watchlist" postback
+                {
+                    string film = activity.Text.Substring(13);
+                    JObject filmJson = JObject.Parse(film);
+                    string filmTitle = (string)filmJson["title"];
+                    int filmId = (int)filmJson["id"];
+                    Activity reply = activity.CreateReply($"Removing \"{filmTitle}\" from your watch list..");
+                    await connector.Conversations.SendToConversationAsync(reply);
+
+                    UserResult userResultModel = new UserResult
+                    {
+                        userId = activity.From.Id,
+                        resultId = filmId
+                    };
+
+                    await connector.Conversations.SendToConversationAsync(reply);
+
+                    List<UserResult> userResultList = await AzureManager.AzureManagerInstance.GetUserResults();
+                    List<UserResult> searchResultList = userResultList
+                        .Where(o => o.resultId == filmId)
+                        .Where(o => o.userId.Equals(activity.From.Id))
+                        .ToList();
+                    List<UserResult> personalizedList = userResultList
+                        .Where(o => o.userId.Equals(activity.From.Id))
+                        .ToList();
+
+                    if (searchResultList.Count > 0)
+                    {
+                        UserResult toBeDeleted = searchResultList[0];
+                        await AzureManager.AzureManagerInstance.DeleteUserResult(toBeDeleted);
+                        reply = activity.CreateReply($"Deleted {toBeDeleted.id}! Here is your to-watch list:");
+
+                        // Display to-watch list
+                        reply.AttachmentLayout = "carousel";
+                        reply.Attachments = new List<Attachment>();
+                        foreach (UserResult userResult in personalizedList)
+                        {
+                            string apiQuery = await client.GetStringAsync(new Uri(
+                                baseUri
+                                + $"/movie/{userResult.resultId}"
+                                + apiKey
+                            ));
+
+                            resultObject = JsonConvert.DeserializeObject<ResultModel.Result>(apiQuery);
+                            List<CardImage> cardImages = new List<CardImage>();
+                            List<CardAction> cardButtons = new List<CardAction>();
+                            CardImage ci = new CardImage($"{imageUrl}{resultObject.poster_path}");
+                            cardImages.Add(ci);
+                            CardAction ca = new CardAction()
+                            {
+                                Title = resultObject.title,
+                                Type = "openUrl",
+                                Value = $"{themoviedbUrl}{resultObject.id}"
+                            };
+                            CardAction button = new CardAction()
+                            {
+                                Title = $"Watched it",
+                                Type = "postBack",
+                                Value = "<REMOVE FILM>{"
+                                        + $"id: {resultObject.id},"
+                                        + $"title: \"{resultObject.title}\""
+                                        + "}"
+                            };
+                            cardButtons.Add(button);
+                            ThumbnailCard tc = new ThumbnailCard()
+                            {
+                                Title = resultObject.title,
+                                Subtitle = resultObject.overview,
+                                Images = cardImages,
+                                Tap = ca,
+                                Buttons = cardButtons
+                            };
+                            reply.Attachments.Add(tc.ToAttachment());
+                        }
+                    }
+                    else
+                    {
+                        reply = activity.CreateReply("Oh no, something went wrong :(");
+                    }
+
+                    await connector.Conversations.SendToConversationAsync(reply);
+                }
+                else
+                {
+                    await Conversation.SendAsync(activity, () => new WhatShouldWeWatchDialogue());
+                }
             }
-            //{
-            //    // create connection
-            //    ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
-            //    string endOutput;
-
-            //    // Stateful variables
-            //    StateClient stateClient = activity.GetStateClient();
-            //    BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-            //    userData.SetProperty<List<int>>("seen", new List<int>());
-
-            //    string message = activity.Text;
-
-
-            //    int queryCount = userData.GetProperty<int>("QueryCount");
-            //    if (message.ToLower().Contains("hi") || message.ToLower().Contains("hello") || message.ToLower().Contains("hey"))
-            //    {
-            //        endOutput = "Hi! Name a movie that is similar to what you want to watch, and I can help you out!";
-            //        await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
-            //    }
-            //    else if (message.ToLower().Contains("clear") || message.ToLower().Contains("reset"))
-            //    {
-            //        endOutput = "Okay okay let's stop. Give me another film to start again.";
-            //        await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
-            //    }
-            //    else // if querying
-            //    {
-            //        string baseUri = "https://api.themoviedb.org/3";
-            //        string credentials = "?api_key=e01be34ceffec7c3b4fc1c591884c2fc";
-            //        ResultModel.RootObject rootObject;
-            //        HttpClient client = new HttpClient();
-            //        ResultModel.Result first;
-            //        ResultModel.Result second;
-            //        List<int> seen = new List<int>();
-
-            //        if (queryCount == 0)
-            //        {
-            //            string x = await client.GetStringAsync(new Uri(
-            //                baseUri
-            //                + "/search/movie"
-            //                + credentials
-            //                + "&query="
-            //                + message
-            //                ));
-            //            rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
-
-            //            if (rootObject.total_results > 1)
-            //            {
-            //                seen = userData.GetProperty<List<int>>("seen");
-            //                first = rootObject.results[0];
-            //                second = rootObject.results[1];
-
-            //                userData.SetProperty<ResultModel.Result>("First", first);
-            //                userData.SetProperty<ResultModel.Result>("Second", second);
-            //                if (first.title.ToLower().Equals(second.title.ToLower()))
-            //                {
-            //                    endOutput = $"Would you rather watch something like" 
-            //                        + $"\n\n\"{first.title} ({DateTime.Parse(first.release_date).Year})\""
-            //                        + $"\n\nor\n\n\"{second.title} ({DateTime.Parse(second.release_date).Year})\"?";
-            //                }
-            //                else
-            //                {
-            //                    endOutput = $"Would you rather watch something like\n\n\"{first.title}\"\n\nor\n\n\"{second.title}\"?";
-            //                }
-
-            //                seen.Add(first.id);
-            //                seen.Add(second.id);
-            //                userData.SetProperty<List<int>>("seen", seen);
-
-            //                userData.SetProperty<int>("QueryCount", queryCount + 1);
-            //                // save user data to bot state
-            //                await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-            //            }
-            //            else
-            //            {
-            //                endOutput = $"I would recommend the film \"{rootObject.results[0].title}\". Give me another film to start again.";
-            //                await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
-            //            }
-            //            userData.SetProperty<int>("QueryCount", queryCount + 1);
-
-            //        }
-            //        else if (queryCount < 3)
-            //        {
-            //            first = userData.GetProperty<ResultModel.Result>("First");
-            //            second = userData.GetProperty<ResultModel.Result>("Second");
-
-            //            int searchId = 0;
-            //            if (message.ToLower().Equals(first.title.ToLower()))
-            //            {
-            //                searchId = first.id;
-            //            }
-            //            else if (message.ToLower().Equals(second.title.ToLower()))
-            //            {
-            //                searchId = second.id;
-            //            }
-            //            else
-            //            {
-            //                string search = await client.GetStringAsync(new Uri(
-            //                baseUri
-            //                + "/search/movie"
-            //                + credentials
-            //                + "&query="
-            //                + message
-            //                ));
-            //                rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(search);
-            //                searchId = rootObject.results.OrderByDescending(o => o.popularity).ToList()[0].id;
-            //            }
-
-            //            string x = await client.GetStringAsync(new Uri(
-            //                baseUri
-            //                + $"/movie/{searchId}/recommendations"
-            //                + credentials
-            //                ));
-            //            rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
-            //            rootObject.results = rootObject.results.OrderByDescending(o => o.popularity).ToList();
-
-
-            //            if (rootObject.results.Count > 1)
-            //            {
-            //                first = rootObject.results[0];
-            //                second = rootObject.results[1];
-
-            //                if (first.title.ToLower().Equals(message.ToLower()))
-            //                {
-            //                    first = rootObject.results[2];
-            //                }
-            //                if (first.title.ToLower().Equals(second.title.ToLower()))
-            //                {
-            //                    second = rootObject.results[3];
-            //                }
-
-            //                userData.SetProperty<ResultModel.Result>("First", first);
-            //                userData.SetProperty<ResultModel.Result>("Second", second);
-            //                endOutput = $"Cool, I'll take that into consideration. Would you rather watch\n\n\"{first.title}\"\n\nor\n\n\"{second.title}?\"";
-            //                userData.SetProperty<int>("QueryCount", queryCount + 1);
-
-            //                seen = userData.GetProperty<List<int>>("seen");
-            //                seen.Add(first.id);
-            //                seen.Add(second.id);
-            //                userData.SetProperty<List<int>>("seen", seen);
-            //            }
-            //            else if (rootObject.results.Count == 1)
-            //            {
-            //                endOutput = $"I would recommend the film \"{rootObject.results[0].title}\". Message me to start again";
-            //                await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
-            //            }
-            //            else
-            //            {
-            //                endOutput = "Just watch \"Trolls 2\"";
-            //            }
-            //            // save user data to bot state
-            //            await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-            //        }
-            //        else
-            //        {
-            //            first = userData.GetProperty<ResultModel.Result>("First");
-            //            second = userData.GetProperty<ResultModel.Result>("Second");
-            //            int searchId;
-            //            if (message.ToLower().Equals(first.title.ToLower()))
-            //            {
-            //                searchId = first.id;
-            //            }
-            //            else if (message.ToLower().Equals(second.title.ToLower()))
-            //            {
-            //                searchId = second.id;
-            //            }
-            //            else
-            //            {
-            //                string search = await client.GetStringAsync(new Uri(
-            //                baseUri
-            //                + "/search/movie"
-            //                + credentials
-            //                + "&query="
-            //                + message
-            //                ));
-            //                rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(search);
-            //                searchId = rootObject.results.OrderByDescending(o => o.popularity).ToList()[0].id;
-            //            }
-            //            string x = await client.GetStringAsync(new Uri(
-            //                baseUri
-            //                + $"/movie/{searchId}/recommendations"
-            //                + credentials
-            //                ));
-            //            rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(x);
-
-            //            //bool found = false;
-            //            int i = 0;
-            //            seen = userData.GetProperty<List<int>>("seen");
-            //            rootObject.results = rootObject.results.OrderByDescending(o => o.popularity).ToList();
-            //            //while (!found || i < rootObject.results.Count)
-            //            //{
-            //            //    if (seen.IndexOf(rootObject.results[i].id) == -1)
-            //            //    {
-            //            //        found = true;
-            //            //    }
-            //            //    i++;
-            //            //}
-            //            endOutput = $"I would recommend the film \"{rootObject.results[i].title}\". Message me to start again";
-            //            await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
-            //        }
-
-
-            //    }
-
-            //    // return our reply to the user
-            //    Activity reply = activity.CreateReply(endOutput);
-            //    await connector.Conversations.ReplyToActivityAsync(reply);
-            //}
             else
             {
                 HandleSystemMessage(activity);
