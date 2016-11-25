@@ -65,10 +65,10 @@ namespace WhatShouldWeWatch.Dialogues
 
                     rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(recommendationQuery);
                     int cardsLength;
-                    if (rootObject.total_results > 3)
+                    if (rootObject.total_results > 5)
                     {
-                        cardsLength = 3;
-                    } else if (rootObject.total_results > 0 && rootObject.total_results < 4) 
+                        cardsLength = 5;
+                    } else if (rootObject.total_results > 0 && rootObject.total_results < 5) 
                     {
                         cardsLength = rootObject.total_results;
                     } else
@@ -171,11 +171,11 @@ namespace WhatShouldWeWatch.Dialogues
                 rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(recommendationQuery);
                 int cardsLength;
                 replyMessage = "This is what I came up with";
-                if (rootObject.total_results > 3)
+                if (rootObject.total_results > 5)
                 {
-                    cardsLength = 3;
+                    cardsLength = 5;
                 }
-                else if (rootObject.total_results > 0 && rootObject.total_results < 4)
+                else if (rootObject.total_results > 0 && rootObject.total_results < 5)
                 {
                     cardsLength = rootObject.total_results;
                 }
