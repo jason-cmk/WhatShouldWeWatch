@@ -15,6 +15,7 @@ using Microsoft.Bot.Builder.Luis.Models;
 using WhatShouldWeWatch.Dialogues;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using WhatShouldWeWatch.Helpers;
 
 namespace WhatShouldWeWatch
 {
@@ -49,150 +50,10 @@ namespace WhatShouldWeWatch
                 Match removeFilmMatch = removeFilmRegex.Match(activity.Text);
                 if (addFilmMatch.Success) // Handle "add to watch list" postback
                 {
-                    string film = activity.Text.Substring(10);
-                    JObject filmJson = JObject.Parse(film);
-                    string filmTitle = (string)filmJson["title"];
-                    int filmId = (int)filmJson["id"];
-                    Activity reply = activity.CreateReply($"Adding \"{filmTitle}\" to your watch list..");
-                    await connector.Conversations.SendToConversationAsync(reply);
-
-                    UserResult userResultModel = new UserResult
-                    {
-                        userId = activity.From.Id,
-                        resultId = filmId
-                    };
-                    
-                    await AzureManager.AzureManagerInstance.AddUserResult(userResultModel);
-                    reply = activity.CreateReply($"It's done! Here is your to-watch list:");
-
-                    List<UserResult> userResultList = await AzureManager.AzureManagerInstance.GetUserResults();
-                    List<UserResult> personalizedList = userResultList.Where(o => o.userId.Equals(activity.From.Id)).ToList();
-
-                    // Display to-watch list
-                    reply.AttachmentLayout = "carousel";
-                    reply.Attachments = new List<Attachment>();
-                    foreach (UserResult userResult in personalizedList)
-                    {
-                        string apiQuery = await client.GetStringAsync(new Uri(
-                            baseUri
-                            + $"/movie/{userResult.resultId}"
-                            + apiKey
-                        ));
-
-                        resultObject = JsonConvert.DeserializeObject<ResultModel.Result>(apiQuery);
-                        List<CardImage> cardImages = new List<CardImage>();
-                        List<CardAction> cardButtons = new List<CardAction>();
-                        CardImage ci = new CardImage($"{imageUrl}{resultObject.poster_path}");
-                        cardImages.Add(ci);
-                        CardAction ca = new CardAction()
-                        {
-                            Title = resultObject.title,
-                            Type = "openUrl",
-                            Value = $"{themoviedbUrl}{resultObject.id}"
-                        };
-                        CardAction button = new CardAction()
-                        {
-                            Title = $"Remove from watch list",
-                            Type = "postBack",
-                            Value = "<REMOVE FILM>{"
-                                    + $"id: {resultObject.id},"
-                                    + $"title: \"{resultObject.title}\""
-                                    + "}"
-                        };
-                        cardButtons.Add(button);
-                        ThumbnailCard tc = new ThumbnailCard()
-                        {
-                            Title = resultObject.title,
-                            Subtitle = resultObject.overview,
-                            Images = cardImages,
-                            Tap = ca,
-                            Buttons = cardButtons
-                        };
-                        reply.Attachments.Add(tc.ToAttachment());
-                    }
-
-                    await connector.Conversations.SendToConversationAsync(reply);
+                    WatchListHelper.AddFilmAsync(activity, connector);
                 } else if (removeFilmMatch.Success) // handle "remove from watchlist" postback
                 {
-                    string film = activity.Text.Substring(13);
-                    JObject filmJson = JObject.Parse(film);
-                    string filmTitle = (string)filmJson["title"];
-                    int filmId = (int)filmJson["id"];
-                    Activity reply = activity.CreateReply($"Removing \"{filmTitle}\" from your watch list..");
-                    await connector.Conversations.SendToConversationAsync(reply);
-
-                    UserResult userResultModel = new UserResult
-                    {
-                        userId = activity.From.Id,
-                        resultId = filmId
-                    };
-
-                    await connector.Conversations.SendToConversationAsync(reply);
-
-                    List<UserResult> userResultList = await AzureManager.AzureManagerInstance.GetUserResults();
-                    List<UserResult> searchResultList = userResultList
-                        .Where(o => o.resultId == filmId)
-                        .Where(o => o.userId.Equals(activity.From.Id))
-                        .ToList();
-                    List<UserResult> personalizedList = userResultList
-                        .Where(o => o.userId.Equals(activity.From.Id))
-                        .ToList();
-
-                    if (searchResultList.Count > 0)
-                    {
-                        UserResult toBeDeleted = searchResultList[0];
-                        await AzureManager.AzureManagerInstance.DeleteUserResult(toBeDeleted);
-                        reply = activity.CreateReply($"Deleted {toBeDeleted.id}! Here is your to-watch list:");
-
-                        // Display to-watch list
-                        reply.AttachmentLayout = "carousel";
-                        reply.Attachments = new List<Attachment>();
-                        foreach (UserResult userResult in personalizedList)
-                        {
-                            string apiQuery = await client.GetStringAsync(new Uri(
-                                baseUri
-                                + $"/movie/{userResult.resultId}"
-                                + apiKey
-                            ));
-
-                            resultObject = JsonConvert.DeserializeObject<ResultModel.Result>(apiQuery);
-                            List<CardImage> cardImages = new List<CardImage>();
-                            List<CardAction> cardButtons = new List<CardAction>();
-                            CardImage ci = new CardImage($"{imageUrl}{resultObject.poster_path}");
-                            cardImages.Add(ci);
-                            CardAction ca = new CardAction()
-                            {
-                                Title = resultObject.title,
-                                Type = "openUrl",
-                                Value = $"{themoviedbUrl}{resultObject.id}"
-                            };
-                            CardAction button = new CardAction()
-                            {
-                                Title = $"Watched it",
-                                Type = "postBack",
-                                Value = "<REMOVE FILM>{"
-                                        + $"id: {resultObject.id},"
-                                        + $"title: \"{resultObject.title}\""
-                                        + "}"
-                            };
-                            cardButtons.Add(button);
-                            ThumbnailCard tc = new ThumbnailCard()
-                            {
-                                Title = resultObject.title,
-                                Subtitle = resultObject.overview,
-                                Images = cardImages,
-                                Tap = ca,
-                                Buttons = cardButtons
-                            };
-                            reply.Attachments.Add(tc.ToAttachment());
-                        }
-                    }
-                    else
-                    {
-                        reply = activity.CreateReply("Oh no, something went wrong :(");
-                    }
-
-                    await connector.Conversations.SendToConversationAsync(reply);
+                    WatchListHelper.RemoveFilmAsync(activity, connector);
                 }
                 else
                 {
