@@ -19,6 +19,8 @@ namespace WhatShouldWeWatch.Dialogues
     [Serializable]
     public class WhatShouldWeWatchDialogue : LuisDialog<object>
     {
+        int MAX_DECK_SIZE = 3;
+
         [LuisIntent("Greeting")]
         public async Task Greeting(IDialogContext context, LuisResult result)
         {
@@ -65,10 +67,10 @@ namespace WhatShouldWeWatch.Dialogues
 
                     rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(recommendationQuery);
                     int cardsLength;
-                    if (rootObject.total_results > 5)
+                    if (rootObject.total_results > MAX_DECK_SIZE)
                     {
-                        cardsLength = 5;
-                    } else if (rootObject.total_results > 0 && rootObject.total_results < 5) 
+                        cardsLength = MAX_DECK_SIZE;
+                    } else if (rootObject.total_results > 0 && rootObject.total_results < MAX_DECK_SIZE) 
                     {
                         cardsLength = rootObject.total_results;
                     } else
@@ -171,11 +173,11 @@ namespace WhatShouldWeWatch.Dialogues
                 rootObject = JsonConvert.DeserializeObject<ResultModel.RootObject>(recommendationQuery);
                 int cardsLength;
                 replyMessage = "This is what I came up with";
-                if (rootObject.total_results > 5)
+                if (rootObject.total_results > MAX_DECK_SIZE)
                 {
-                    cardsLength = 5;
+                    cardsLength = MAX_DECK_SIZE;
                 }
-                else if (rootObject.total_results > 0 && rootObject.total_results < 5)
+                else if (rootObject.total_results > 0 && rootObject.total_results < MAX_DECK_SIZE)
                 {
                     cardsLength = rootObject.total_results;
                 }
