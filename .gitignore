@@ -48,16 +48,10 @@ Temporary Items
 
 \.vs/config/applicationhost\.config
 
-*.dll
-
-bin/Microsoft\.Bot\.Builder\.Autofac\.xml
-
-*.xml
-
 bin/*
 
 packages/*
 
-obj/Debug/
+obj/*
 
-packages/Autofac\.3\.5\.2/
+packages/*
