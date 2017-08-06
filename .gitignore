@@ -45,3 +45,19 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+\.vs/config/applicationhost\.config
+
+*.dll
+
+bin/Microsoft\.Bot\.Builder\.Autofac\.xml
+
+*.xml
+
+bin/*
+
+packages/*
+
+obj/Debug/
+
+packages/Autofac\.3\.5\.2/
